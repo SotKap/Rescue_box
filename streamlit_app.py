@@ -12,84 +12,77 @@ import random
 st.set_page_config(page_title="ARCHA Cloud Dashboard", page_icon="🏺", layout="wide")
 
 # --------------------------------------------------------
-# CUSTOM RESPONSIVE CSS
+# CUSTOM RESPONSIVE CSS + COLORED CARDS
 # --------------------------------------------------------
 st.markdown("""
-    <style>
-    /* GLOBAL STYLE */
-    .main {
-        background-color: #f9f9fb;
-        padding: 0;
-    }
-    .card {
-        background: white;
-        border-radius: 12px;
-        padding: 1rem 1.2rem;
-        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-        margin-bottom: 1rem;
-    }
-    .metric {
-        font-size: 1.8rem;
-        font-weight: bold;
-    }
-    .label {
-        color: #555;
-        font-size: 0.9rem;
-    }
-    .warning {
-        color: #e74c3c;
-        font-weight: 600;
-    }
+<style>
+/* Global background and typography */
+.main {
+    background-color: #f9f9fb;
+    padding: 0;
+    font-family: "Helvetica Neue", sans-serif;
+}
 
-    /* HEADER BAR */
-    .title-bar {
-        background-color: #1e5ab6;
-        color: white;
-        padding: 0.8rem 1.5rem;
-        border-radius: 0 0 10px 10px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-    .title-left {
-        font-weight: 600;
-        font-size: 1.4rem;
-    }
-    .nav a {
-        color: white;
-        text-decoration: none;
-        margin: 0 10px;
-        font-size: 1rem;
-    }
+/* Top blue header */
+.title-bar {
+    background-color: #1e5ab6;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.title-left {
+    font-weight: 600;
+    font-size: 1.4rem;
+}
+.nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 1rem;
+}
 
-    /* RESPONSIVE BEHAVIOR */
-    @media (max-width: 1024px) {
-        .title-bar { flex-direction: column; align-items: flex-start; }
-        .title-left { margin-bottom: 0.5rem; }
-    }
+/* White dashboard cards */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
 
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 0.6rem !important;
-            padding-right: 0.6rem !important;
-        }
-        h4 { font-size: 1rem !important; }
-        .metric { font-size: 1.3rem !important; }
-        .card { padding: 0.8rem !important; }
-        .stPlotlyChart { height: 250px !important; }
-    }
+/* COLORED METRIC BOXES */
+.metric-box {
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    text-align: center;
+    margin-bottom: 0.8rem;
+    font-weight: bold;
+}
+.temp-box { background: linear-gradient(180deg, #f39c12 0%, #e67e22 100%); }
+.humid-box { background: linear-gradient(180deg, #c0392b 0%, #a93226 100%); }
+.light-box { background: linear-gradient(180deg, #3498db 0%, #2980b9 100%); }
 
-    @media (max-width: 600px) {
-        /* Stack all columns vertically on mobile */
-        [data-testid="stHorizontalBlock"] > div {
-            flex-direction: column !important;
-            align-items: stretch !important;
-        }
-        .stPlotlyChart { height: 200px !important; }
-        .nav a { display: none; } /* hide navbar on mobile for simplicity */
-    }
-    </style>
+.metric-value {
+    font-size: 1.8rem;
+    margin-bottom: 0.2rem;
+}
+.metric-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Responsive layout for phones and tablets */
+@media (max-width: 768px) {
+    .block-container { padding: 0.5rem !important; }
+    h4 { font-size: 1rem !important; }
+    .metric-value { font-size: 1.3rem !important; }
+}
+</style>
 """, unsafe_allow_html=True)
 
 # --------------------------------------------------------
@@ -120,42 +113,53 @@ light = [round(random.uniform(100, 240), 1) for _ in range(24)]
 df = pd.DataFrame({"Time": timestamps, "Temperature": temperature,
                    "Humidity": humidity, "Light": light})
 
+latest = df.iloc[-1]
+
 # --------------------------------------------------------
 # FIRST ROW
 # --------------------------------------------------------
 col1, col2, col3 = st.columns([1.2, 1.6, 1.2])
 
-# LEFT CARD
+# LEFT COLUMN – RESCUE BOX INFO + COLORED PANELS
 with col1:
-    st.markdown("""
+    st.markdown(f"""
     <div class="card">
         <h4>RESCUE BOX 2</h4>
         <p><b>Artifact ID:</b> K126-01<br>
            <b>Material:</b> Wood<br>
            <b>Site:</b> Poseidi</p>
-        <div class="metric" style="color:#e67e22;">20.3°C</div>
-        <div class="label">Temperature</div>
-        <div class="metric" style="color:#c0392b;">78%</div>
-        <div class="label">Relative Humidity</div>
-        <div class="metric" style="color:#2980b9;">220 lux</div>
-        <div class="label">Light Level</div>
+
+        <div class="metric-box temp-box">
+            <div class="metric-value">{latest['Temperature']}°C</div>
+            <div class="metric-label">Temperature</div>
+        </div>
+
+        <div class="metric-box humid-box">
+            <div class="metric-value">{latest['Humidity']}%</div>
+            <div class="metric-label">Relative Humidity</div>
+        </div>
+
+        <div class="metric-box light-box">
+            <div class="metric-value">{latest['Light']} lux</div>
+            <div class="metric-label">Light Level</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-# MIDDLE CARD – CHART
+# MIDDLE COLUMN – CHART
 with col2:
     st.markdown('<div class="card"><h4>ENVIRONMENTAL DATA</h4>', unsafe_allow_html=True)
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["Time"], y=df["Temperature"], name="Temperature", line=dict(color="#e67e22")))
-    fig.add_trace(go.Scatter(x=df["Time"], y=df["Humidity"], name="Rel. Humidity", line=dict(color="#6c5ce7")))
-    fig.add_trace(go.Scatter(x=df["Time"], y=df["Light"], name="Light", line=dict(color="#3498db")))
+    fig.add_trace(go.Scatter(x=df["Time"], y=df["Humidity"], name="Rel. Humidity", line=dict(color="#c0392b")))
+    fig.add_trace(go.Scatter(x=df["Time"], y=df["Light"], name="Light", line=dict(color="#2980b9")))
     fig.update_layout(height=260, margin=dict(l=10, r=10, t=20, b=10),
-                      xaxis_title="", yaxis_title="%", template="plotly_white",
+                      xaxis_title="", yaxis_title="Value", template="plotly_white",
                       legend=dict(orientation="h", y=-0.2))
     st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# RIGHT CARD – MAP
+# RIGHT COLUMN – MAP
 with col3:
     st.markdown('<div class="card"><h4>ARTIFACT CONDITION: WOOD</h4>', unsafe_allow_html=True)
     m = folium.Map(location=[39.9, 23.4], zoom_start=6)
@@ -173,7 +177,7 @@ with col4:
     st.markdown("""
     <div class="card">
         <h4>AI PRESERVATION RECOMMENDATION</h4>
-        <p class="warning">⚠️ High humidity detected<br>Add desiccant</p>
+        <p style="color:#e74c3c;font-weight:bold;">⚠️ High humidity detected<br>Add desiccant</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -195,7 +199,7 @@ with col6:
     <div class="card">
         <h4>RECENT ALERTS</h4>
         <p><b>Poseidi</b><br>Jan. 18 2024 02:15<br>
-        <span class="warning">⚠️ High humidity</span></p>
+        <span style="color:#e74c3c;font-weight:bold;">⚠️ High humidity</span></p>
     </div>
     """, unsafe_allow_html=True)
 
