@@ -12,18 +12,16 @@ import random
 st.set_page_config(page_title="ARCHA Cloud Dashboard", page_icon="🏺", layout="wide")
 
 # --------------------------------------------------------
-# CUSTOM RESPONSIVE CSS + COLORED CARDS
+# CUSTOM RESPONSIVE CSS + COLORED PANELS
 # --------------------------------------------------------
 st.markdown("""
 <style>
-/* Global background and typography */
-.main {
+body {
     background-color: #f9f9fb;
-    padding: 0;
     font-family: "Helvetica Neue", sans-serif;
 }
 
-/* Top blue header */
+/* Header bar */
 .title-bar {
     background-color: #1e5ab6;
     color: white;
@@ -45,7 +43,7 @@ st.markdown("""
     font-size: 1rem;
 }
 
-/* White dashboard cards */
+/* Card container */
 .card {
     background: white;
     border-radius: 12px;
@@ -54,14 +52,20 @@ st.markdown("""
     margin-bottom: 1rem;
 }
 
-/* COLORED METRIC BOXES */
+/* Metric colored panels */
+.metric-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
 .metric-box {
     border-radius: 12px;
-    padding: 1rem;
     color: white;
     text-align: center;
-    margin-bottom: 0.8rem;
+    padding: 1rem 1rem;
+    width: 100%;
     font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.15);
 }
 .temp-box { background: linear-gradient(180deg, #f39c12 0%, #e67e22 100%); }
 .humid-box { background: linear-gradient(180deg, #c0392b 0%, #a93226 100%); }
@@ -76,11 +80,12 @@ st.markdown("""
     opacity: 0.9;
 }
 
-/* Responsive layout for phones and tablets */
+/* Responsive layout for small screens */
 @media (max-width: 768px) {
     .block-container { padding: 0.5rem !important; }
-    h4 { font-size: 1rem !important; }
-    .metric-value { font-size: 1.3rem !important; }
+    .title-bar { flex-direction: column; align-items: flex-start; }
+    .metric-value { font-size: 1.4rem; }
+    .nav a { display: none; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -103,7 +108,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --------------------------------------------------------
-# MOCK DATA
+# MOCK SENSOR DATA
 # --------------------------------------------------------
 now = datetime.now()
 timestamps = [now - timedelta(hours=i) for i in range(24)][::-1]
@@ -112,11 +117,10 @@ humidity = [round(random.uniform(50, 80), 1) for _ in range(24)]
 light = [round(random.uniform(100, 240), 1) for _ in range(24)]
 df = pd.DataFrame({"Time": timestamps, "Temperature": temperature,
                    "Humidity": humidity, "Light": light})
-
 latest = df.iloc[-1]
 
 # --------------------------------------------------------
-# FIRST ROW
+# LAYOUT
 # --------------------------------------------------------
 col1, col2, col3 = st.columns([1.2, 1.6, 1.2])
 
@@ -128,20 +132,19 @@ with col1:
         <p><b>Artifact ID:</b> K126-01<br>
            <b>Material:</b> Wood<br>
            <b>Site:</b> Poseidi</p>
-
-        <div class="metric-box temp-box">
-            <div class="metric-value">{latest['Temperature']}°C</div>
-            <div class="metric-label">Temperature</div>
-        </div>
-
-        <div class="metric-box humid-box">
-            <div class="metric-value">{latest['Humidity']}%</div>
-            <div class="metric-label">Relative Humidity</div>
-        </div>
-
-        <div class="metric-box light-box">
-            <div class="metric-value">{latest['Light']} lux</div>
-            <div class="metric-label">Light Level</div>
+        <div class="metric-row">
+            <div class="metric-box temp-box">
+                <div class="metric-value">{latest['Temperature']}°C</div>
+                <div class="metric-label">Temperature</div>
+            </div>
+            <div class="metric-box humid-box">
+                <div class="metric-value">{latest['Humidity']}%</div>
+                <div class="metric-label">Relative Humidity</div>
+            </div>
+            <div class="metric-box light-box">
+                <div class="metric-value">{latest['Light']} lux</div>
+                <div class="metric-label">Light Level</div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -169,7 +172,7 @@ with col3:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --------------------------------------------------------
-# SECOND ROW
+# SECOND ROW – AI RECOMMENDATIONS & ALERTS
 # --------------------------------------------------------
 col4, col5, col6 = st.columns([1.2, 1.6, 1.2])
 
@@ -203,4 +206,7 @@ with col6:
     </div>
     """, unsafe_allow_html=True)
 
+# --------------------------------------------------------
+# FOOTER
+# --------------------------------------------------------
 st.markdown("<br><center><small>ARCHA Cloud © 2025 – Robotic Alienz | FLL UNEARTHED</small></center>", unsafe_allow_html=True)
